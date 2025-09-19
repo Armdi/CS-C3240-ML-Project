@@ -18,14 +18,6 @@ if __name__ == '__main__':
     df['smoker'] = df['smoker'].map({'yes': 1, 'no': 0})
     df = pd.get_dummies(df, columns=['region'], drop_first=True)
 
-    sns.boxplot(x="smoker",y="charges", data=df)
-    plt.title("Charges by Smoking Status")
-    plt.show()
-
-    sns.scatterplot(x="bmi", y="charges", data=df)
-    plt.title("BMI vs Charges")
-    plt.show()
-
     X = df.drop("charges", axis=1)
     y = df["charges"]
 

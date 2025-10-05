@@ -5,11 +5,9 @@ warnings.filterwarnings("ignore")
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, PolynomialFeatures
-from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, KFold, cross_val_score
@@ -46,7 +44,7 @@ if __name__ == '__main__':
     for name, model in models.items():
         model.fit(X_train, y_train)
         y_pred_train = model.predict(X_train)
-        train_mae = mean_squared_error(y_train, y_pred_train)
+        train_mae = mean_absolute_error(y_train, y_pred_train)
         train_rmse = np.sqrt(mean_squared_error(y_train, y_pred_train))
         train_r2 = r2_score(y_train, y_pred_train)
 

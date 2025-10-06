@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     cv = KFold(n_splits=5, shuffle=True, random_state=42)
 
-    results_test = []
+    results_train = []
     results_cv = []
 
     for name, model in models.items():
@@ -53,13 +53,26 @@ if __name__ == '__main__':
         cv_rmse = -cross_val_score(model, X_train, y_train, scoring='neg_root_mean_squared_error', cv=cv).mean()
         cv_r2 = cross_val_score(model, X_train, y_train, scoring='r2', cv=cv).mean()
 
-        results_test.append([name, train_mae, train_rmse, train_r2])
+        results_train.append([name, train_mae, train_rmse, train_r2])
         results_cv.append([name, cv_mae, cv_rmse, cv_r2])
 
-    result_test_df = pd.DataFrame(results_test, columns=["Model", "Train MAE", "Train RMSE", "Train R2"])
+    result_train_df = pd.DataFrame(results_train, columns=["Model", "Train MAE", "Train RMSE", "Train R2"])
     result_df = pd.DataFrame(results_cv, columns=["Model", "CV MAE", "CV RMSE", "CV R2"])
-    print("\nTest results:\n", result_test_df)
+    print("\nTraining results:\n", result_train_df)
     print("\nCross-validation results:\n", result_df)
+
+    # Evaluate each model on the test set
+    results_test_set = []
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+        y_pred_test = model.predict(X_test)
+        test_mae = mean_absolute_error(y_test, y_pred_test)
+        test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+        test_r2 = r2_score(y_test, y_pred_test)
+        results_test_set.append([name, test_mae, test_rmse, test_r2])
+
+    result_test_set_df = pd.DataFrame(results_test_set, columns=["Model", "Test MAE", "Test RMSE", "Test R2"])
+    print("\nTest results:\n", result_test_set_df)
 
     # Select best (by CV MAE)
     best = result_df.loc[result_df["CV MAE"].idxmin(), "Model"]
@@ -78,6 +91,12 @@ if __name__ == '__main__':
     print("MAE:", round(mae, 2))
     print("RMSE:", round(rmse, 2))
     print("R²:", round(r2, 3))
+
+    # If the best model is Random Forest, print feature importances
+    if best == "Random Forest":
+        importances = pd.Series(final_model.feature_importances_, index=X_train.columns)
+        print("\nRandom Forest feature importances:")
+        print(importances.sort_values(ascending=False).head(5))
 
     # Plot predicted vs actual
     plt.scatter(y_test, y_pred, alpha=0.5)

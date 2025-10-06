@@ -39,7 +39,8 @@ if __name__ == '__main__':
 
     cv = KFold(n_splits=5, shuffle=True, random_state=42)
 
-    results = []
+    results_test = []
+    results_cv = []
 
     for name, model in models.items():
         model.fit(X_train, y_train)
@@ -52,9 +53,12 @@ if __name__ == '__main__':
         cv_rmse = -cross_val_score(model, X_train, y_train, scoring='neg_root_mean_squared_error', cv=cv).mean()
         cv_r2 = cross_val_score(model, X_train, y_train, scoring='r2', cv=cv).mean()
 
-        results.append([name, train_mae, cv_mae, cv_rmse, cv_r2])
+        results_test.append([name, train_mae, train_rmse, train_r2])
+        results_cv.append([name, cv_mae, cv_rmse, cv_r2])
 
-    result_df = pd.DataFrame(results, columns=["Model", "Train MAE", "CV MAE", "CV RMSE", "CV R2"])
+    result_test_df = pd.DataFrame(results_test, columns=["Model", "Train MAE", "Train RMSE", "Train R2"])
+    result_df = pd.DataFrame(results_cv, columns=["Model", "CV MAE", "CV RMSE", "CV R2"])
+    print("\nTest results:\n", result_test_df)
     print("\nCross-validation results:\n", result_df)
 
     # Select best (by CV MAE)
